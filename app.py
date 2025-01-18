@@ -192,6 +192,19 @@ def send_otp():
                 "https://securepay.sslcommerz.com/gwprocess/v4/image/gw1/nagad.png"
             )
             paymentslug = "nagad"
+        elif payment == "NEXUS":
+            paymentlink = (
+                "https://securepay.sslcommerz.com/gwprocess/v4/image/gw1/dbblnexus.png"
+            )
+            paymentslug = "dbbl_nexus"
+        elif payment == "DBBL MOBILE BANKING":
+            paymentlink = "https://securepay.sslcommerz.com/gwprocess/v4/image/gw1/dbblmobilebank.png"
+            paymentslug = "dbblmobilebanking"
+        elif payment == "Tapnpay":
+            paymentlink = (
+                "https://securepay.sslcommerz.com/gwprocess/v4/image/gw1/tapnpay.png"
+            )
+            paymentslug = "tapnpay"
 
         if visa == "medical":
             visa_type_id = 13
@@ -201,6 +214,10 @@ def send_otp():
             visa_type_id = 2
             visa_type_name = "STUDENT VISA"
             visa_order = 6
+        elif visa == "entry":
+            visa_type_id = 6
+            visa_type_name = "ENTRY VISA"
+            visa_order = 5
 
         payload = {
             "_token": csrf_token,
