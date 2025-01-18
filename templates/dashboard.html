@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" type="application/json" href="/manifest.webmanifest" />
+    <title>Payment Links</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .error {
+            color: red;
+        }
+
+        button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff3333;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Payment Links</h1>
+    <div id="response"></div>
+    <script>
+        const getlinksurl = "{{ url_for('get_links') }}";
+        const stopInstanceUrl = "{{ url_for('stop_instance') }}";  // URL for the stop instance route
+
+        // Function to fetch and display data
+        async function fetchAndUpdateData() {
+            const responseDiv = document.getElementById("response");
+            responseDiv.innerHTML = "Fetching data...";
+
+            try {
+                const response = await fetch(getlinksurl, {
+                    method: "GET",
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Create a table
+                    const table = document.createElement("table");
+                    const thead = document.createElement("thead");
+                    const tbody = document.createElement("tbody");
+
+                    // Add headers (excluding the "Key", "CSRF Token", and "XSRF Token")
+                    const headers = ["Email", "Center Name", "Phone", "Payment", "Visa", "Status", "Running", "Action"];
+                    const headerRow = document.createElement("tr");
+                    headers.forEach(header => {
+                        const th = document.createElement("th");
+                        th.textContent = header;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    // Add rows
+                    Object.entries(data).forEach(([key, entry]) => {
+                        const row = document.createElement("tr");
+                        const rowData = [
+                            entry.email || "",
+                            entry.center_name || "",
+                            entry.phone || "",
+                            entry.payment || "",
+                            entry.visa || "",
+                            entry.status || "",
+                            entry.running ? "Yes" : "No",
+                        ];
+
+                        // Add data to the row
+                        rowData.forEach(value => {
+                            const td = document.createElement("td");
+                            td.textContent = value;
+                            row.appendChild(td);
+                        });
+
+                        // Add the "Stop" button
+                        const stopButtonCell = document.createElement("td");
+                        const stopButton = document.createElement("button");
+                        stopButton.textContent = "Stop Process";
+                        stopButton.onclick = async () => {
+                            // Send the stop request for the corresponding instance_id (file1)
+                            const formData = new FormData();
+                            formData.append("instance_id", entry.file1);  // Pass the instance ID (file1)
+
+                            try {
+                                const stopResponse = await fetch(stopInstanceUrl, {
+                                    method: "POST",
+                                    body: formData,
+                                });
+
+                                if (stopResponse.ok) {
+                                    const stopData = await stopResponse.json();
+                                    alert(stopData.status);  // Show the response message
+                                } else {
+                                    alert("Error stopping the process.");
+                                }
+                            } catch (error) {
+                                alert("An error occurred while stopping the process.");
+                            }
+                        };
+                        stopButtonCell.appendChild(stopButton);
+                        row.appendChild(stopButtonCell);
+
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+
+                    // Clear previous content and append table
+                    responseDiv.innerHTML = "";
+                    responseDiv.appendChild(table);
+                } else {
+                    responseDiv.innerHTML = `Error: ${response.status} ${response.statusText}`;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
+            }
+        }
+
+        // Call the function every 5 seconds
+        fetchAndUpdateData(); // Run immediately on load
+        setInterval(fetchAndUpdateData, 5000);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API with Multiple Inputs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/styles.css') }}">
+</head>
+<body>
+    <a href="/dashboard">Open Dashboard</a>
+    <form id="dataForm">
+        <div class="form-group">
+            <div>
+                <label for="csrf_token">CSRF Token:</label>
+                <input type="text" id="csrf_token" name="csrf_token" required>
+            </div>
+            <div>
+                <label for="xsrftoken">XSRF Token:</label>
+                <input type="text" id="xsrftoken" name="xsrftoken" required>
+            </div>
+            <div>
+                <label for="ivac_session">IVAC Session:</label>
+                <input type="text" id="ivac_session" name="ivac_session" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                <label for="ivac_center">Visa:</label>
+                <select id="visa" name="visa" required>
+                    <option value="student">Student</option>
+                    <option value="medical">Medical</option>
+                </select>
+            </div>
+            <div>
+                <label for="ivac_center">Payment:</label>
+                <select id="payment" name="payment" required>
+                    <option value="Bkash">Bkash</option>
+                    <option value="Nagad">Nagad</option>
+                    <option value="NEXUS">DBBL Nexus</option>
+                    <option value="Tapnpay">Tapnpay</option>
+                    <option value="DBBL MOBILE BANKING">DBBL MOBILE BANKING</option>
+                </select>
+            </div>
+            
+        </div>
+        <div class="form-group">
+            <div>
+                <label for="ivac_center">IVAC Center:</label>
+                <select id="ivac_center" name="ivac_center" required>
+                    <option value="Dhaka">Dhaka</option>
+                    <option value="Khulna">Khulna</option>
+                    <option value="Rajshahi">Rajshahi</option>
+                </select>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="name1">Name 1:</label>
+            <input type="text" id="name1" name="name1" required>
+            <label for="fileID1">File ID 1:</label>
+            <input type="text" id="fileID1" name="fileID1" required>
+        </div>
+        <div class="form-group">
+            <label for="name2">Name 2:</label>
+            <input type="text" id="name2" name="name2">
+            <label for="fileID2">File ID 2:</label>
+            <input type="text" id="fileID2" name="fileID2">
+        </div>
+        <div class="form-group">
+            <label for="name3">Name 3:</label>
+            <input type="text" id="name3" name="name3">
+            <label for="fileID3">File ID 3:</label>
+            <input type="text" id="fileID3" name="fileID3">
+        </div>
+
+        <button type="submit">Add Instances</button>
+    </form>
+    <div>
+        <h2>Responses</h2>
+        <ul id="responseList"></ul>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        const sendOtpUrl = "{{ url_for('send_otp') }}";
+    </script>
+</body>
+
+</html>
