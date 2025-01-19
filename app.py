@@ -426,7 +426,6 @@ def send_otp():
                     response = conn.getresponse()
                     print(f"File: ")
                     body = response.read().decode("utf-8")
-                    process[file1]["status"] = "Slot not available"
 
                     if response.status != 504:
                         print(f"{body}")
@@ -437,13 +436,16 @@ def send_otp():
                         # code = 200
                         # zsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhn
                         if code:
+                            process[file1]["status"] = "Slot not available"
                             print("Code:", code)
                             if code == "200" or code == 200:
                                 break
                     else:
-                        print("504 on sendOtp")
+                        # print("504 on sendOtp")
+                        process[file1]["status"] = "504 on sendOtp"
                 except:
-                    print("No Json on sendOtp")
+                    # print("No Json on sendOtp")
+                    process[file1]["status"] = "No Json on sendOtp"
             while process[file1]["running"]:
                 process[file1]["status"] = "Getting OTP"
                 conn2 = http.client.HTTPSConnection(
@@ -510,9 +512,13 @@ def send_otp():
                         else:
                             print(f"Code was not found at veifyOtp for file: ")
                     else:
-                        print("504 on VerifyOtp")
+                        # print("504 on VerifyOtp")
+                        process[file1]["status"] = "504 on VerifyOtp"
                 except:
-                    print(f"Response was not Json at VerifyOtp for file: ")
+                    # print(f"Response was not Json at VerifyOtp for file: ")
+                    process[file1][
+                        "status"
+                    ] = "Response was not Json at VerifyOtp for file: "
 
             while process[file1]["running"]:
                 process[file1]["status"] = "Getting Slot Times"
@@ -587,6 +593,7 @@ def send_otp():
                                 continue
                         else:
                             print(f"Status not OK for file")
+                            process[file1]["status"] = "Status not OK for file"
                 except json.JSONDecodeError:
                     print("Failed to parse JSON response on generateSlotTimes.")
 
@@ -629,6 +636,7 @@ def send_otp():
                                 url = response_data.get("url")
                                 print(f"{url}{paymentslug}")
                                 process[file1]["status"] = f"{url}{paymentslug}"
+                                process[file1]["running"] = False
                                 return {"Link": f"{url}{paymentslug}"}, 200
                                 # conn5 = http.client.HTTPSConnection("api.sms.net.bd")
                                 # conn5.request(
@@ -642,6 +650,7 @@ def send_otp():
 
                     else:
                         print("Response was not in JSON format slot_pay_now..")
+                        process[file1]["status"] = "504 on Slot Paying"
                 except json.JSONDecodeError:
                     print("Failed to parse JSON response on slot_pay_now.")
 
