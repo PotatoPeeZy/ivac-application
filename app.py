@@ -470,13 +470,14 @@ def send_otp():
             while process[file1]["running"]:
                 process[file1]["status"] = "Verifying OTP"
                 try:
-                    conn.request(
+                    conn5 = http.client.HTTPSConnection(target_host)
+                    conn5.request(
                         "POST",
                         target_path,
                         urlencode(payload),
                         headers,
                     )
-                    response = conn.getresponse()
+                    response = conn5.getresponse()
                     print(f"Verifying OTP: ")
                     if response.status != 504:
                         body = response.read().decode("utf-8")
@@ -523,12 +524,9 @@ def send_otp():
             while process[file1]["running"]:
                 process[file1]["status"] = "Getting Slot Times"
                 try:
-                    conn3 = http.client.HTTPSConnection(PROXY_HOST, PROXY_PORT)
-                    headers["Proxy-Authorization"] = f"Basic {encoded_auth}"
-                    conn3.set_tunnel(
-                        target_host,
-                        headers={"Proxy-Authorization": f"Basic {encoded_auth}"},
-                    )
+                    if "Proxy-Authorization" in headers:
+                        headers.pop("Proxy-Authorization")
+                    conn3 = http.client.HTTPSConnection(target_host)
                     conn3.request(
                         "POST",
                         "/get_payment_options_v2",
@@ -600,14 +598,11 @@ def send_otp():
             while process[file1]["running"]:
 
                 try:
+                    if "Proxy-Authorization" in headers:
+                        headers.pop("Proxy-Authorization")
                     process[file1]["status"] = "Attempting Slot Paying"
-                    payload["hash_params"] = getCaptchaToken()
-                    conn4 = http.client.HTTPSConnection(PROXY_HOST, PROXY_PORT)
-                    headers["Proxy-Authorization"] = f"Basic {encoded_auth}"
-                    conn4.set_tunnel(
-                        target_host,
-                        headers={"Proxy-Authorization": f"Basic {encoded_auth}"},
-                    )
+                    payload["hash_params"] = process[file1]["token"]
+                    conn4 = http.client.HTTPSConnection(target_host)
                     conn4.request(
                         "POST",
                         "/slot_pay_now",
