@@ -4,8 +4,10 @@ import http.client
 import json
 from urllib.parse import urlencode
 import threading
+import time
 
 app = Flask(__name__)
+
 
 CLIENT_KEY = "next_3763e1a4be2dc031f68295d42615603e38"
 WEBSITE_URL = "https://payment.ivacbd.com"
@@ -33,6 +35,9 @@ def add_instance(process, instance_id, form_data, status=422, running=True):
         "status": status,
         "running": running,
     }
+    while True:
+        process[instance_id]["token"] = getCaptchaToken()
+        time.sleep(30)
 
 
 def getCaptchaToken():
@@ -135,7 +140,9 @@ def send_otp():
             "visa": visa,
         }
 
-        add_instance(process, file1, form_data_1)
+        threading.Thread(
+            target=lambda: add_instance(process, file1, form_data_1)
+        ).start()
 
         # Print the accessed elements
         print("Received Data:")
@@ -422,6 +429,7 @@ def send_otp():
                         target_host,
                         headers={"Proxy-Authorization": f"Basic {encoded_auth}"},
                     )
+                    print(process[file1]["token"])
                     conn.request("POST", target_path, urlencode(payload), headers)
                     response = conn.getresponse()
                     print(f"File: ")
@@ -470,6 +478,8 @@ def send_otp():
             while process[file1]["running"]:
                 process[file1]["status"] = "Verifying OTP"
                 try:
+                    if "Proxy-Authorization" in headers:
+                        headers.pop("Proxy-Authorization")
                     conn5 = http.client.HTTPSConnection(target_host)
                     conn5.request(
                         "POST",
@@ -596,7 +606,6 @@ def send_otp():
                     print("Failed to parse JSON response on generateSlotTimes.")
 
             while process[file1]["running"]:
-
                 try:
                     if "Proxy-Authorization" in headers:
                         headers.pop("Proxy-Authorization")
@@ -610,7 +619,6 @@ def send_otp():
                         headers,
                     )
                     response = conn4.getresponse()
-
                     if response.status != 504:
                         body = response.read().decode("utf-8")
                         print(body)
