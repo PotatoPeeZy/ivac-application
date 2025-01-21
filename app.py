@@ -418,7 +418,6 @@ def send_otp():
                 try:
                     # payload["hash_params_otp"] = getCaptchaToken()
                     conn = http.client.HTTPSConnection(target_host)
-                    print(process[file1]["token"])
                     conn.request("POST", target_path, urlencode(payload), headers)
                     response = conn.getresponse()
                     print(f"File: ")
