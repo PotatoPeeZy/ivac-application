@@ -443,9 +443,11 @@ def send_otp():
                     else:
                         # print("504 on sendOtp")
                         process[file1]["status"] = "504 on sendOtp"
+                        time.sleep(5)
                 except:
                     # print("No Json on sendOtp")
                     process[file1]["status"] = "No Json on sendOtp"
+                    time.sleep(5)
             while process[file1]["running"]:
                 process[file1]["status"] = "Getting OTP"
                 conn2 = http.client.HTTPSConnection(
