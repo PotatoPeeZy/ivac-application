@@ -413,22 +413,11 @@ def send_otp():
         proxy_auth = f"{PROXY_USER}:{PROXY_PASS}"
         encoded_auth = base64.b64encode(proxy_auth.encode("utf-8")).decode("utf-8")
 
-        conn = http.client.HTTPSConnection(PROXY_HOST, PROXY_PORT)
-        headers["Proxy-Authorization"] = f"Basic {encoded_auth}"
-        conn.set_tunnel(
-            target_host, headers={"Proxy-Authorization": f"Basic {encoded_auth}"}
-        )
-
         try:
             while process[file1]["running"]:
                 try:
                     # payload["hash_params_otp"] = getCaptchaToken()
-                    conn = http.client.HTTPSConnection(PROXY_HOST, PROXY_PORT)
-                    headers["Proxy-Authorization"] = f"Basic {encoded_auth}"
-                    conn.set_tunnel(
-                        target_host,
-                        headers={"Proxy-Authorization": f"Basic {encoded_auth}"},
-                    )
+                    conn = http.client.HTTPSConnection(target_host)
                     print(process[file1]["token"])
                     conn.request("POST", target_path, urlencode(payload), headers)
                     response = conn.getresponse()
@@ -441,13 +430,16 @@ def send_otp():
                         response_data = json.loads(body)
                         # Retrieve the 'code' from the response
                         code = response_data.get("code", None)
+                        message = response_data.get("message", None)
                         # code = 200
                         # zsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhn
                         if code:
-                            process[file1]["status"] = "Slot not available"
+                            process[file1]["status"] = message
                             print("Code:", code)
                             if code == "200" or code == 200:
                                 break
+                            else:
+                                time.sleep(5)
                     else:
                         # print("504 on sendOtp")
                         process[file1]["status"] = "504 on sendOtp"
@@ -496,11 +488,14 @@ def send_otp():
                         response_data = json.loads(body)
                         # Retrieve the 'code' from the response
                         code = response_data.get("code", None)
+
                         # code = 200
                         if code:
                             print("Code:", code)
                             # zsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhn
                             if code == "200" or code == 200:
+                                message = response_data.get("message", None)
+                                process[file1]["status"] = message
                                 slot_dates = response_data.get("data", {}).get(
                                     "slot_dates", None
                                 )
