@@ -400,7 +400,7 @@ def send_otp():
             "Accept": "application/json, text/plain, */*",
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8;",
             "Cookie": f"XSRF-TOKEN={xsrf_token}; ivac_session={ivac_session}",
-            "Proxy-Authorization": f"Basic {encoded_auth}",
+            # "Proxy-Authorization": f"Basic {encoded_auth}",
         }
 
         conn2 = http.client.HTTPSConnection("monthly-boss-polliwog.ngrok-free.app")
@@ -423,12 +423,13 @@ def send_otp():
                         target_host,
                         headers={"Proxy-Authorization": f"Basic {encoded_auth}"},
                     )
+                    conn.request("POST", target_path, urlencode(payload), headers)
                     response = conn.getresponse()
                     print(f"File: ")
                     body = response.read().decode("utf-8")
+                    print(f"{body}")
 
                     if response.status != 504:
-                        print(f"{body}")
 
                         # Parse the body as JSON
                         response_data = json.loads(body)
