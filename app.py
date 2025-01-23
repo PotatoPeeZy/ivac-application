@@ -35,7 +35,7 @@ def add_instance(process, instance_id, form_data, status=422, running=True):
         "status": status,
         "running": running,
     }
-    while True:
+    while process[instance_id]["running"]:
         process[instance_id]["token"] = getCaptchaToken()
         time.sleep(30)
 
@@ -68,7 +68,7 @@ def getCaptchaToken():
             "taskId": taskId,
         }
     )
-    print(f"Captcha Obtaining for file ")
+    # print(f"Captcha Obtaining for file ")
     while True:
         conn2 = http.client.HTTPSConnection("api.nextcaptcha.com")
         conn2.request("POST", "/getTaskResult", payload1, headers1)
@@ -400,7 +400,7 @@ def send_otp():
             "Accept": "application/json, text/plain, */*",
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8;",
             "Cookie": f"XSRF-TOKEN={xsrf_token}; ivac_session={ivac_session}",
-            # "Proxy-Authorization": f"Basic {encoded_auth}",
+            "Proxy-Authorization": f"Basic {encoded_auth}",
         }
 
         conn2 = http.client.HTTPSConnection("monthly-boss-polliwog.ngrok-free.app")
@@ -417,14 +417,19 @@ def send_otp():
             while process[file1]["running"]:
                 try:
                     # payload["hash_params_otp"] = getCaptchaToken()
-                    conn = http.client.HTTPSConnection(target_host)
-                    conn.request("POST", target_path, urlencode(payload), headers)
+                    conn = http.client.HTTPSConnection(PROXY_HOST, PROXY_PORT)
+                    headers["Proxy-Authorization"] = f"Basic {encoded_auth}"
+                    conn.set_tunnel(
+                        target_host,
+                        headers={"Proxy-Authorization": f"Basic {encoded_auth}"},
+                    )
                     response = conn.getresponse()
                     print(f"File: ")
                     body = response.read().decode("utf-8")
 
                     if response.status != 504:
                         print(f"{body}")
+
                         # Parse the body as JSON
                         response_data = json.loads(body)
                         # Retrieve the 'code' from the response
@@ -437,16 +442,12 @@ def send_otp():
                             print("Code:", code)
                             if code == "200" or code == 200:
                                 break
-                            else:
-                                time.sleep(5)
                     else:
-                        # print("504 on sendOtp")
+                        print("504 on sendOtp")
                         process[file1]["status"] = "504 on sendOtp"
-                        time.sleep(5)
                 except:
-                    # print("No Json on sendOtp")
+                    print("No Json on sendOtp")
                     process[file1]["status"] = "No Json on sendOtp"
-                    time.sleep(5)
             while process[file1]["running"]:
                 process[file1]["status"] = "Getting OTP"
                 conn2 = http.client.HTTPSConnection(
@@ -471,16 +472,13 @@ def send_otp():
             while process[file1]["running"]:
                 process[file1]["status"] = "Verifying OTP"
                 try:
-                    if "Proxy-Authorization" in headers:
-                        headers.pop("Proxy-Authorization")
-                    conn5 = http.client.HTTPSConnection(target_host)
-                    conn5.request(
+                    conn.request(
                         "POST",
                         target_path,
                         urlencode(payload),
                         headers,
                     )
-                    response = conn5.getresponse()
+                    response = conn.getresponse()
                     print(f"Verifying OTP: ")
                     if response.status != 504:
                         body = response.read().decode("utf-8")
@@ -516,13 +514,14 @@ def send_otp():
                                     break
                                 else:
                                     print(f"Slot Date not found for file: ")
+                                    process[file1]["status"] = "Slot Date not found"
                         else:
                             print(f"Code was not found at veifyOtp for file: ")
                     else:
-                        # print("504 on VerifyOtp")
+                        print("504 on VerifyOtp")
                         process[file1]["status"] = "504 on VerifyOtp"
                 except:
-                    # print(f"Response was not Json at VerifyOtp for file: ")
+                    print(f"Response was not Json at VerifyOtp for file: ")
                     process[file1][
                         "status"
                     ] = "Response was not Json at VerifyOtp for file: "
@@ -530,16 +529,13 @@ def send_otp():
             while process[file1]["running"]:
                 process[file1]["status"] = "Getting Slot Times"
                 try:
-                    if "Proxy-Authorization" in headers:
-                        headers.pop("Proxy-Authorization")
-                    conn3 = http.client.HTTPSConnection(target_host)
-                    conn3.request(
+                    conn.request(
                         "POST",
                         "/get_payment_options_v2",
                         urlencode(payload),
                         headers,
                     )
-                    response = conn3.getresponse()
+                    response = conn.getresponse()
                     print(f"Getting Slot Times")
                     if response.status != 504:
                         body = response.read().decode("utf-8")
@@ -603,18 +599,15 @@ def send_otp():
 
             while process[file1]["running"]:
                 try:
-                    if "Proxy-Authorization" in headers:
-                        headers.pop("Proxy-Authorization")
                     process[file1]["status"] = "Attempting Slot Paying"
                     payload["hash_params"] = process[file1]["token"]
-                    conn4 = http.client.HTTPSConnection(target_host)
-                    conn4.request(
+                    conn.request(
                         "POST",
                         "/slot_pay_now",
                         urlencode(payload),
                         headers,
                     )
-                    response = conn4.getresponse()
+                    response = conn.getresponse()
                     if response.status != 504:
                         body = response.read().decode("utf-8")
                         print(body)
