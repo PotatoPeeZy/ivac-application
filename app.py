@@ -4,7 +4,6 @@ import http.client
 import json
 from urllib.parse import urlencode
 import threading
-import time
 
 app = Flask(__name__)
 
@@ -95,12 +94,15 @@ def stop_instance():
 
 @app.route("/sendOtp", methods=["POST"])
 def send_otp():
-    # Proxy details
     PROXY_HOST = "53253ad010a9a77e.tuf.as.pyproxy.io"
     PROXY_PORT = 16666
     PROXY_USER = "ivacapp00-zone-resi-region-bd"
     PROXY_PASS = "ivacpassword88"
 
+    # PROXY_HOST = "http://185.230.245.187"
+    # PROXY_PORT = 12321
+    # PROXY_USER = "1eXUfMkvLXkVuu9g"
+    # PROXY_PASS = "metafore"
     # Parse the form data into a dictionary
     form_data = request.form.to_dict()
 
@@ -138,9 +140,7 @@ def send_otp():
             "visa": visa,
         }
 
-        threading.Thread(
-            target=lambda: add_instance(process, file1, form_data_1)
-        ).start()
+        add_instance(process, file1, form_data_1)
 
         # Print the accessed elements
         print("Received Data:")
@@ -425,9 +425,10 @@ def send_otp():
                     response = conn.getresponse()
                     print(f"File: ")
                     body = response.read().decode("utf-8")
+                    print(f"{body}")
 
                     if response.status != 504:
-                        print(f"{body}")
+
                         # Parse the body as JSON
                         response_data = json.loads(body)
                         # Retrieve the 'code' from the response
