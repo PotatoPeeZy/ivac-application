@@ -96,15 +96,11 @@ def stop_instance():
 @app.route("/sendOtp", methods=["POST"])
 def send_otp():
     # Proxy details
-    # PROXY_HOST = "53253ad010a9a77e.tuf.as.pyproxy.io"
-    # PROXY_PORT = 16666
-    # PROXY_USER = "ivacapp00-zone-resi-region-bd"
-    # PROXY_PASS = "ivacpassword88"
+    PROXY_HOST = "53253ad010a9a77e.tuf.as.pyproxy.io"
+    PROXY_PORT = 16666
+    PROXY_USER = "ivacapp00-zone-resi-region-bd"
+    PROXY_PASS = "ivacpassword88"
 
-    PROXY_HOST = "http://185.230.245.187"
-    PROXY_PORT = 12321
-    PROXY_USER = "1eXUfMkvLXkVuu9g"
-    PROXY_PASS = "metafore"
     # Parse the form data into a dictionary
     form_data = request.form.to_dict()
 
