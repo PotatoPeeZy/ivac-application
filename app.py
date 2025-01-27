@@ -35,9 +35,6 @@ def add_instance(process, instance_id, form_data, status=422, running=True):
         "status": status,
         "running": running,
     }
-    while process[instance_id]["running"]:
-        process[instance_id]["token"] = getCaptchaToken()
-        time.sleep(30)
 
 
 def getCaptchaToken():
@@ -99,10 +96,15 @@ def stop_instance():
 @app.route("/sendOtp", methods=["POST"])
 def send_otp():
     # Proxy details
-    PROXY_HOST = "53253ad010a9a77e.tuf.as.pyproxy.io"
-    PROXY_PORT = 16666
-    PROXY_USER = "ivacapp00-zone-resi-region-bd"
-    PROXY_PASS = "ivacpassword88"
+    # PROXY_HOST = "53253ad010a9a77e.tuf.as.pyproxy.io"
+    # PROXY_PORT = 16666
+    # PROXY_USER = "ivacapp00-zone-resi-region-bd"
+    # PROXY_PASS = "ivacpassword88"
+
+    PROXY_HOST = "http://185.230.245.187"
+    PROXY_PORT = 12321
+    PROXY_USER = "1eXUfMkvLXkVuu9g"
+    PROXY_PASS = "metafore"
     # Parse the form data into a dictionary
     form_data = request.form.to_dict()
 
@@ -427,10 +429,9 @@ def send_otp():
                     response = conn.getresponse()
                     print(f"File: ")
                     body = response.read().decode("utf-8")
-                    print(f"{body}")
 
                     if response.status != 504:
-
+                        print(f"{body}")
                         # Parse the body as JSON
                         response_data = json.loads(body)
                         # Retrieve the 'code' from the response
@@ -601,7 +602,7 @@ def send_otp():
             while process[file1]["running"]:
                 try:
                     process[file1]["status"] = "Attempting Slot Paying"
-                    payload["hash_params"] = process[file1]["token"]
+                    payload["hash_params"] = getCaptchaToken()
                     conn.request(
                         "POST",
                         "/slot_pay_now",
