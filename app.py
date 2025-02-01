@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import base64
 import http.client
 import json
@@ -434,10 +434,11 @@ def send_otp():
                         # Retrieve the 'code' from the response
                         code = response_data.get("code", None)
                         message = response_data.get("message", None)
+                        if message:
+                            process[file1]["status"] = message
                         # code = 200
                         # zsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhnzsexrdcfrvtgybuhnujmk,zsxdrcftvgbhnjmk,xdcfvgbhn
                         if code:
-                            process[file1]["status"] = message
                             print("Code:", code)
                             if code == "200" or code == 200:
                                 break
@@ -653,6 +654,60 @@ def send_otp():
 
     threading.Thread(target=process_otp).start()
     return json.dumps({"status": "Processing SendOTP"}), 200
+
+
+otp_storage = {}
+
+
+@app.route("/submit_otp", methods=["GET", "POST"])
+def submit_otp():
+    data = request.json
+    own_phone_number = data.get("own_phone_number")
+    sender_phone_number = data.get("sender_phone_number")
+    otp = data.get("msg")
+    print(sender_phone_number, own_phone_number)
+
+    if not own_phone_number or not otp:
+        return jsonify({"error": "Missing phone_number or OTP"}), 200
+
+    # Store the OTP for the phone number
+    if (
+        sender_phone_number == "IVAC_BD"
+        or sender_phone_number == "01708-404440"
+        or sender_phone_number == "01708404440"
+        or sender_phone_number == "+8801708-404440"
+        or sender_phone_number == "+8801708404440"
+    ):
+        otp_storage[own_phone_number] = otp[:6]
+
+    print(otp_storage)
+    return jsonify({"message": "OTP received"}), 200
+
+
+# ngrok http --url=monthly-boss-polliwog.ngrok-free.app 5000
+
+
+@app.route("/get_otp/<phone_number>", methods=["GET", "POST"])
+def get_otp(phone_number):
+    otp = otp_storage.get(phone_number)
+    if otp:
+        return jsonify({"otp": otp}), 200
+    return jsonify({"error": "OTP not found"}), 404
+
+
+@app.route("/reset_otp/<phone_number>", methods=["POST"])
+def reset_otp(phone_number):
+    if phone_number in otp_storage:
+        del otp_storage[phone_number]
+        return jsonify({"message": f"OTP for {phone_number} has been reset."}), 200
+    return jsonify({"error": "Phone number not found in OTP storage."}), 404
+
+
+@app.route("/reset_otps", methods=["POST"])
+def reset_otps():
+    global otp_storage
+    otp_storage = {}
+    return jsonify({"message": "All OTPs have been reset."}), 200
 
 
 @app.route("/")
