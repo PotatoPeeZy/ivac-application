@@ -4,6 +4,7 @@ import http.client
 import json
 from urllib.parse import urlencode
 import threading
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
@@ -95,14 +96,14 @@ def stop_instance():
 @app.route("/sendOtp", methods=["POST"])
 def send_otp():
     PROXY_HOST = "53253ad010a9a77e.tuf.as.pyproxy.io"
-    PROXY_PORT = 16666
+    PROXY_PORT = 51202
     PROXY_USER = "ivacapp00-zone-resi-region-bd"
     PROXY_PASS = "ivacpassword88"
 
-    # PROXY_HOST = "http://185.230.245.187"
+    # PROXY_HOST = "23.146.144.102"
     # PROXY_PORT = 12321
     # PROXY_USER = "1eXUfMkvLXkVuu9g"
-    # PROXY_PASS = "metafore"
+    # PROXY_PASS = "metaFore"
     # Parse the form data into a dictionary
     form_data = request.form.to_dict()
 
@@ -407,33 +408,37 @@ def send_otp():
         data2 = res2.read()
 
         target_host = "payment.ivacbd.com"
-        target_path = "/queue-manage"
+        target_path = (
+            "/"  # dsjngkjlagnjgfnj;fngjk;agnjafng;kjnfg;a;ngas;nkjfgns;nsggfasgfn
+        )
         proxy_auth = f"{PROXY_USER}:{PROXY_PASS}"
         encoded_auth = base64.b64encode(proxy_auth.encode("utf-8")).decode("utf-8")
 
         try:
             while process[file1]["running"]:
                 try:
+                    conn = http.client.HTTPSConnection("payment.ivacbd.com")
                     # payload["hash_params_otp"] = getCaptchaToken()
-                    conn = http.client.HTTPSConnection(PROXY_HOST, PROXY_PORT)
-                    headers["Proxy-Authorization"] = f"Basic {encoded_auth}"
-                    conn.set_tunnel(
-                        target_host,
-                        headers={"Proxy-Authorization": f"Basic {encoded_auth}"},
-                    )
-                    conn.request("POST", target_path, urlencode(payload), headers)
+                    conn.request("GET", "/", headers=headers)
                     response = conn.getresponse()
                     print(f"File: ")
                     body = response.read().decode("utf-8")
                     print(f"{body}")
 
                     if response.status != 504:
+                        soup = BeautifulSoup(body, "html.parser")
+                        # Extract the message
+                        message_div = soup.find(
+                            "div", class_="col-md-12 text-center text-danger"
+                        )
+                        message = (
+                            message_div.get_text(strip=True)
+                            if message_div
+                            else "Data Format not matched..."
+                        )
 
-                        # Parse the body as JSON
-                        response_data = json.loads(body)
-                        # Retrieve the 'code' from the response
-                        code = response_data.get("code", None)
-                        message = response_data.get("message", None)
+                        # Print the extracted message
+                        print(message)
                         if message:
                             process[file1]["status"] = message
                         # code = 200
@@ -444,10 +449,12 @@ def send_otp():
                                 break
                     else:
                         print("504 on sendOtp")
-                        process[file1]["status"] = "504 on sendOtp"
+                        process[file1][
+                            "status"
+                        ] = "Session Login Error Occured.Trying Again..."
                 except:
                     print("No Json on sendOtp")
-                    process[file1]["status"] = "No Json on sendOtp"
+                    process[file1]["status"] = "No Json on application-info-submit"
             while process[file1]["running"]:
                 process[file1]["status"] = "Getting OTP"
                 conn2 = http.client.HTTPSConnection(
