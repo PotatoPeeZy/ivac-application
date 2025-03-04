@@ -5,6 +5,7 @@ import json
 from urllib.parse import urlencode
 import threading
 from bs4 import BeautifulSoup
+import time
 
 app = Flask(__name__)
 
@@ -416,6 +417,7 @@ def send_otp():
 
         try:
             while process[file1]["running"]:
+                time.sleep(3)
                 try:
                     conn = http.client.HTTPSConnection("payment.ivacbd.com")
                     # payload["hash_params_otp"] = getCaptchaToken()
@@ -424,9 +426,8 @@ def send_otp():
                     print(f"File: ")
                     body = response.read().decode("utf-8")
                     print(f"{body}")
-
                     if response.status != 504:
-                        soup = BeautifulSoup(body, "html.parser")
+                        soup = BeautifulSoup(body, "html.parser")a
                         # Extract the message
                         message_div = soup.find(
                             "div", class_="col-md-12 text-center text-danger"
